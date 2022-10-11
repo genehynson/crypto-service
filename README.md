@@ -14,6 +14,16 @@ InfluxDB is a natural choice for a backend to this problem since the price data 
 
 When the user makes a HTTP request to our hosted endpoints, this service makes two queries to InfluxDB: 1) get the price data for the requested crypto pair and 2) calculate the rank of the reuqested crypto pair. The results are formatted in a user-friendly json object and returned to the user.
 
+## Source code layout
+
+Most of the files are generated from Django's starter project. Here are some others of interest:
+
+- `crypto/crypto/cron.py`: Contains the function `crypto_price_cron()` that is run on a cron schedule.
+- `crypto/crypto/settings./py`: Contains the cron job settings at the bottom of the file.
+- `crypto/crypto/service/query.py`: Contains the InfluxDB queries to list price data and compute the rank metric.
+- `crypto/crypto/service/views.py`: Contains the API endpoint definitions.
+- `docker-compose.yml`: Contains the environment configuration for the Django app and InfluxDB.
+
 ## How to get it running
 
 To make things simple I've containerized the crypto service and provided a `docker-compose.yml` file to run the crypto service alongside InfluxDB. The docker compose file contains all the environment variables neccesary for the crypto service to successfully communicate with InfluxDB.
