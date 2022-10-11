@@ -1,39 +1,29 @@
 services:
-  crypto-api:
-    build: cryptoApi
-    command: python cryptoApi/manage.py runserver 0.0.0.0:8000
-    ports:
-      - 8000:8000
-    volumes:
-      - .:/cryptoApi
-    depends_on:
-      - influxdb
-  crypto-poll:
-    build: cryptoPoll
-    command: python cryptoPoll/manage.py runserver 0.0.0.0:8001
+  crypto-service:
+    build: crypto
+    command: bash -c "service cron start && python crypto/manage.py crontab add && python crypto/manage.py runserver 0.0.0.0:8001"
     ports:
       - 8001:8001
     volumes:
-      - .:/cryptoPoll
+      - .:/crypto
     depends_on:
-      - crypto-poll-migration
       - influxdb
-  crypto-poll-migration:
-    build: cryptoPoll
-    command: python cryptoPoll/manage.py migrate --noinput
-    volumes:
-      - .:/cryptoPoll
+    environment:
+      - INFLUXDB_TOKEN=yDg3JBxHMIikkocU9fSrzONAC2fvvGLb4o2jk0NVXrZPMZpS
+      - INFLUXDB_ORG=crypto-org
+      - INFLUXDB_BUCKET=crypto
+      - INFLUXDB_ADDRESS=http://influxdb:8086
   influxdb:
     image: influxdb
     ports:
       - 8086:8086
     volumes:
-      - influxdb:/var/lib/influxdb
+      - ./data:/var/lib/influxdb
+      - ./config:/etc/influxdb
     environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=crypto-admin
       - DOCKER_INFLUXDB_INIT_PASSWORD=tothemoon
       - DOCKER_INFLUXDB_INIT_ORG=crypto-org
       - DOCKER_INFLUXDB_INIT_BUCKET=crypto
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=yDg3JBxHMIikkocU9fSrzONAC2fvvGLb4o2jk0NVXrZPMZpS
-volumes:
-  influxdb: {}
